@@ -211,7 +211,7 @@ nav {
 }
 
 #restaurants-list .restaurant-img {
-  background-color: #;
+  background-color: black;
   display: block;
   margin: 0;
 	max-width: 100%;
@@ -255,7 +255,7 @@ nav {
 }
 
 #restaurants-list li a {
-  color: #;
+  color: black;
   display: inline-block;
   text-align: left;
   text-decoration: none;
