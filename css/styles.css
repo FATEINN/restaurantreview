@@ -83,7 +83,7 @@ header {
 }
 
 #maincontent {
-  background-color: #1833ab;
+  background-color:;
   min-height: 100%;
 }
 #footer {
@@ -211,7 +211,7 @@ nav {
 }
 
 #restaurants-list .restaurant-img {
-  background-color: #ccc;
+  background-color: #;
   display: block;
   margin: 0;
 	max-width: 100%;
@@ -255,7 +255,7 @@ nav {
 }
 
 #restaurants-list li a {
-  color: #fff;
+  color: #;
   display: inline-block;
   text-align: left;
   text-decoration: none;
@@ -265,7 +265,7 @@ nav {
 	background-color: #fff;
 }
 #restaurants-list a:hover .restaurant-name {
-  color: #ed1E79;
+  color: #;
 }
 
 
