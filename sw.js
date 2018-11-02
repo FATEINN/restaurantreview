@@ -1,74 +1,76 @@
-const mainCache = "restaurant-reviews-v1";
-
-self.addEventListener('install', (evt) => {
-    //installation will finish only after all files are cached
-    evt.waitUntil(
-        caches.open(mainCache).then((cache) => {
-            //store a reference of cache in currentCache property
-            //to use it later to add content to cache
-            self.currentCache = cache;
-            //add to cache the basic files of the page
-            return cache.addAll([
-                'index.html',
-                'restaurant.html',
-                'css/styles.css',
-                'css/styles-rest.css',
-                'css/media.css',
-                'css/media-rest.css',
-                'js/dbhelper.js',
-                'js/main.js',
-                'js/restaurant_info.js',
-                'data/restaurants.json',
-                'img/1.jpg',
-                'img/2.jpg',
-                'img/3.jpg',
-                'img/4.jpg',
-                'img/5.jpg',
-                'img/6.jpg',
-                'img/7.jpg',
-                'img/8.jpg',
-                'img/9.jpg',
-                'img/rest.jpg'
-            ]);
-        }).catch((err) => {
-            console.log("error in load files in cache", err);
-        })
-    );
+var staticCacheName = 'mws-static-v1';
+/**
+ * Install Service worker and cache all pages and assets required for offline access
+ */
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(staticCacheName).then((cache) => {
+    return cache.addAll(['./',
+      'js/main.js', 'js/restaurant_info.js', 'js/dbhelper.js', 'js/indexController.js',
+      'css/styles.css',
+      'img/1.jpg', 'img/2.jpg', 'img/3.jpg', 'img/4.jpg', 'img/5.jpg', 'img/6.jpg', 'img/7.jpg', 'img/8.jpg', 'img/9.jpg', 'img/10.jpg',
+      'data/restaurants.json',
+      'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
+      'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
+      ]);
+  }));
 });
 
-//fetch files from cache or network
-self.addEventListener('fetch', (evt) => {
+/**
+ * Activate Service worker and delete old cache (if any) add new cache
+ */
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.keys().then((cacheNames) => {
+    return Promise.all(cacheNames.filter((cacheName) => {
+      return cacheName.startsWith('mws-') && cacheName != staticCacheName;
+    }).map((cacheName) => {
+      return caches.delete(cacheName);
+    }));
+  }));
+});
 
-    evt.respondWith(
-        //check first if requested files are already in cache
-        caches.match(evt.request).then((response) => {
-
-            if (response) {
-                //if files are find in cache return
-                return response;
-            } else {
-                //if files are not found in cache request them from the network
-                return fetch(evt.request).then((response) => {
-                    return response;
-                }).catch((err) => {
-                    console.log('Fetching failed', err);
-                });
-            }
-        })
-    );
-
-    //save to cache files that were not placed there during service worker installation
-    //this is mainly for map files. When user visits a restaurant page, images of the map
-    //are stored in cache memory. When user uses the app offline will now have access to 
-    //map images for restaurant pages he visited in the past using network connection.
-    caches.match(evt.request).then((response) => {
-        if (!response) {
-            //if response is not found in cache get if again from network and save it in cache
-            fetch(evt.request).then((response) => {
-                //do this by using the reference to current cache property
-                self.currentCache.put(evt.request, response);
-            });
+/***
+ * Intercept all request and match against the cache to respond accordingly
+ */
+self.addEventListener('fetch', (event) => {
+  event.respondWith(caches.match(event.request).then((response) => {
+    /**
+     * If we have a matching response, we return the cached value, otherwise we return
+     * the result of a call to fetch, which will make a network request and return the
+     * data if anything can be retrieved from the network.
+     * This is a simple example and uses any cached assets we cached during the install step.
+     */
+    return response ||
+    caches.open(staticCacheName).then((cache) => {
+      return fetch(event.request).then((response) => {
+        if (response.status === 404) {
+          console.log("Page not found.");
+          return new Response("Page not found.")
         }
+        /**
+         * If we want to cache new requests cumulatively, we can do so by handling the response
+         * of the fetch request and then adding it to the cache, like below.
+         * Below code will cache the visited restaurant page
+         */
+        if(event.request.url.indexOf('restaurant.html') != -1 || event.request.url.indexOf('leaflet') != -1){
+          cache.put(event.request, response.clone());
+        }
+        return response;
+      });
     });
+  }).catch(function() {
+      // If both(cache miss and n/w fetch) fail, show a generic fallback:
+      return new Response("You seems to be offline, and we didn't find any old cache for the URL.")
+  })
+  );
+});
 
+/**
+ * listen for the "message" event, and call
+ * skipWaiting if you get the appropriate message
+ */
+self.addEventListener('message', (event) => {
+  if (event.data) {
+    console.log('Messgae received:' + event.data);
+    self.skipWaiting();
+  }
 });
