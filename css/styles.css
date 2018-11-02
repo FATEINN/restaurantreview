@@ -344,7 +344,7 @@ nav {
 }
 #restaurant-container h2,
 #reviews-container h2 {
-  color: #333;
+  
   text-transform: uppercase;
 }
 
@@ -364,7 +364,7 @@ nav {
   text-transform: uppercase;
 }
 .inside .rating {
-  color: #1833ab;
+ 
   padding: 0.1em 0.4em;
   margin: 0.5em 0;
   border-radius: 0.5em;
@@ -422,7 +422,7 @@ nav {
 #restaurant-hours td {
   font-weight: 400;
   font-size: 0.8em;
-  color: #333;
+  
   padding-right: 1em;
 }
 #restaurant-hours tr td:first-of-type {
